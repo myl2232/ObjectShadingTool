@@ -15,5 +15,6 @@ public:
 	virtual void ShutdownModule() override;
 	
 private:
-	FShadingManager mShadingManager;
+	UPROPERTY()
+	UShadingManager* mShadingManager;
 };

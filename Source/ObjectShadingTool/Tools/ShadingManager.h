@@ -1,14 +1,21 @@
 ﻿#pragma once
+
+#include "CoreMinimal.h"
 #include "TextureBackupManager.h"
 #include "Common/PathUtils.h"
 #include "Common/ShadingData.h"
 #include "Engine/World.h"
 
-class FShadingManager
+#include "ShadingManager.generated.h"
+
+UCLASS()
+class UShadingManager : public UObject
 {
+	GENERATED_BODY()
+
 public:
-	FShadingManager();
-	~FShadingManager();
+	UShadingManager();
+	~UShadingManager();
 	
 protected:
 	void Initialize();

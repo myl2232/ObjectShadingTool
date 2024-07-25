@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "CoreMinimal.h"
 #include "Materials/MaterialInstanceConstant.h"
+#include "ShadingData.generated.h"
 
 /** Enum representing mesh texture styles */
 UENUM()
@@ -11,10 +12,9 @@ enum class ETextureStyle : uint8
 };
 
 UENUM()
-enum EFilterType : uint8
+enum class EFilterType : uint8
 {	
 	EFilter_String,
-	EFilter_Object,
 	EFilter_Property,	
 };
 
@@ -35,14 +35,6 @@ struct FStringShadingFilter : public FShadingFilter
 };
 
 USTRUCT(BlueprintType)
-struct FObjectShadingFilter : public FShadingFilter
-{
-	GENERATED_BODY()
-	
-	TWeakObjectPtr<UObject> ParentObject;
-};
-
-USTRUCT(BlueprintType)
 struct FPropertyShadingFilter : public FShadingFilter
 {
 	GENERATED_BODY()
@@ -51,6 +43,8 @@ struct FPropertyShadingFilter : public FShadingFilter
 USTRUCT(BlueprintType)
 struct FShadingSemantic
 {
+	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, Category= "Semantic Class")
 	FString Name;
 	UPROPERTY(EditAnywhere, Category= "Semantic Class")
@@ -59,8 +53,6 @@ struct FShadingSemantic
 	TArray<FShadingFilter> Filters;
 	/** Reference to the plain color material instance */
 	UPROPERTY(EditAnywhere, Category = "Semantic Class")
-	UMaterialInstanceConstant* PlainColorMaterialInstance;
-	
-	
+	UMaterialInstanceConstant* PlainColorMaterialInstance;		
 };
 

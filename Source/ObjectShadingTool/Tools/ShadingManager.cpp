@@ -7,8 +7,10 @@
 #include "FileHelpers.h"
 #endif
 
+const FString UShadingManager::SemanticColorParameter(TEXT("SemanticColor"));
+const FString UShadingManager::UndefinedSemanticClassName(TEXT("Undefined"));
 
-FShadingManager::FShadingManager()
+UShadingManager::UShadingManager()
 {
 	bEventsBound = false;
 
@@ -21,36 +23,36 @@ FShadingManager::FShadingManager()
 	Initialize();
 }
 
-FShadingManager::~FShadingManager()
+UShadingManager::~UShadingManager()
 {
 	
 }
 
-void FShadingManager::Initialize()
+void UShadingManager::Initialize()
 {	
 	BindEvents();
 }
 
-void FShadingManager::BindEvents()
+void UShadingManager::BindEvents()
 {
 	// Bind event to OnLevelActorDeleted event to remove the actor from our buffers
 	if (!bEventsBound)
 	{
-		GEngine->OnLevelActorAdded().AddUObject(this, &FShadingManager::OnLevelActorAdded);
-		GEngine->OnLevelActorDeleted().AddUObject(this, &FShadingManager::OnLevelActorDeleted);
-		GEngine->OnEditorClose().AddUObject(this, &FShadingManager::OnEditorClose);
-		GWorld->OnLevelsChanged().AddUObject(this, &FShadingManager::OnLevelChanged);
+		GEngine->OnLevelActorAdded().AddUObject(this, &UShadingManager::OnLevelActorAdded);
+		GEngine->OnLevelActorDeleted().AddUObject(this, &UShadingManager::OnLevelActorDeleted);
+		GEngine->OnEditorClose().AddUObject(this, &UShadingManager::OnEditorClose);
+		GWorld->OnLevelsChanged().AddUObject(this, &UShadingManager::OnLevelChanged);
 	
 		bEventsBound = true;
 	}
 }
 
-void FShadingManager::OnLevelChanged()
+void UShadingManager::OnLevelChanged()
 {
 	ActorClassPairs.Empty();
 }
 
-void FShadingManager::OnLevelActorAdded(AActor* Actor)
+void UShadingManager::OnLevelActorAdded(AActor* Actor)
 {
 	UE_LOG(LogShadingTool, Log, TEXT("%s: Adding actor '%s'"), *FString(__FUNCTION__), *Actor->GetName())
 
@@ -61,7 +63,7 @@ void FShadingManager::OnLevelActorAdded(AActor* Actor)
 	SetSemanticClassToActor(Actor, UndefinedSemanticClassName, bForceDisplaySemanticClass, bDelayAddingDescriptors);
 }
 
-void FShadingManager::OnLevelActorDeleted(AActor* Actor)
+void UShadingManager::OnLevelActorDeleted(AActor* Actor)
 {
 	UE_LOG(LogShadingTool, Log, TEXT("%s: Removing actor '%s'"), *FString(__FUNCTION__), *Actor->GetName())
 	ActorClassPairs.Remove(Actor->GetActorGuid());
@@ -69,7 +71,7 @@ void FShadingManager::OnLevelActorDeleted(AActor* Actor)
 }
 
 #if PLATFORM_WINDOWS
-void FShadingManager::OnEditorClose()
+void UShadingManager::OnEditorClose()
 {
 	UE_LOG(LogShadingTool, Log, TEXT("%s: Making sure original mesh colors are selected"), *FString(__FUNCTION__))
 	CheckoutTextureStyle(ETextureStyle::COLOR);
@@ -80,7 +82,7 @@ void FShadingManager::OnEditorClose()
 }
 #endif
 
-void FShadingManager::SetSemanticClassToActor(AActor* Actor, const FString& ClassName, const bool bForceDisplaySemanticClass, const bool bDelayAddingDescriptors)
+void UShadingManager::SetSemanticClassToActor(AActor* Actor, const FString& ClassName, const bool bForceDisplaySemanticClass, const bool bDelayAddingDescriptors)
 {
 	// Remove class if already assigned
 	ActorClassPairs.Remove(Actor->GetActorGuid());
@@ -117,7 +119,7 @@ void FShadingManager::SetSemanticClassToActor(AActor* Actor, const FString& Clas
 	// No need to save the TextureMappingAsset for every actor, the caller will do it
 }
 
-void FShadingManager::CheckoutActorTexture(AActor* Actor, const ETextureStyle NewTextureStyle)
+void UShadingManager::CheckoutActorTexture(AActor* Actor, const ETextureStyle NewTextureStyle)
 {
 	// Check if the actor has a semantic class assigned
 	const FGuid& ActorGuid = Actor->GetActorGuid();
@@ -164,7 +166,7 @@ void FShadingManager::CheckoutActorTexture(AActor* Actor, const ETextureStyle Ne
 	TextureBackupManager->AddAndPaint(Actor, bDoAdd, bDoPaint, Material);
 }
 
-void FShadingManager::CheckoutTextureStyle(const ETextureStyle NewTextureStyle)
+void UShadingManager::CheckoutTextureStyle(const ETextureStyle NewTextureStyle)
 {
 	UE_LOG(LogShadingTool, Log, TEXT("%s: New texture style: %d"), *FString(__FUNCTION__), NewTextureStyle)
 
@@ -189,7 +191,7 @@ void FShadingManager::CheckoutTextureStyle(const ETextureStyle NewTextureStyle)
 	CurrentTextureStyle = NewTextureStyle;
 }
 
-UMaterialInstanceConstant* FShadingManager::GetSemanticClassMaterial(FShadingSemantic& SemanticClass)
+UMaterialInstanceConstant* UShadingManager::GetSemanticClassMaterial(FShadingSemantic& SemanticClass)
 {
 	// If the plain color material is null, create it
 	if (SemanticClass.PlainColorMaterialInstance == nullptr)
@@ -201,6 +203,7 @@ UMaterialInstanceConstant* FShadingManager::GetSemanticClassMaterial(FShadingSem
 		const FString PackagePath =
 			FPathUtils::ProjectPluginContentDir() / FString(TEXT("ConstMaterials")) / PackageFileName;
 		UPackage* Package = CreatePackage(*PackagePath);
+
 		SemanticClass.PlainColorMaterialInstance = Cast<UMaterialInstanceConstant>(Factory->FactoryCreateNew(
 			UMaterialInstanceConstant::StaticClass(),
 			Package,
