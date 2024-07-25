@@ -36,7 +36,7 @@ void UShadingManager::Initialize()
 void UShadingManager::BindEvents()
 {
 	// Bind event to OnLevelActorDeleted event to remove the actor from our buffers
-	if (!bEventsBound)
+	if (!bEventsBound && GEngine)
 	{
 		GEngine->OnLevelActorAdded().AddUObject(this, &UShadingManager::OnLevelActorAdded);
 		GEngine->OnLevelActorDeleted().AddUObject(this, &UShadingManager::OnLevelActorDeleted);

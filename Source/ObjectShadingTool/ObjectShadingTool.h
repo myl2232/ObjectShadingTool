@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
-#include "Tools/ShadingManager.h"
+#include "Widgets/WidgetManager.h"
 
 class FObjectShadingToolModule : public IModuleInterface
 {
@@ -15,6 +15,6 @@ public:
 	virtual void ShutdownModule() override;
 	
 private:
-	UPROPERTY()
-	UShadingManager* mShadingManager;
+	
+	FWidgetManager WidgetManager;
 };

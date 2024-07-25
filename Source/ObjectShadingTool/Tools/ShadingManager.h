@@ -15,13 +15,13 @@ class UShadingManager : public UObject
 
 public:
 	UShadingManager();
-	~UShadingManager();
+	~UShadingManager(); 
+	
+	void BindEvents();
 	
 protected:
 	void Initialize();
 	
-	void BindEvents();
-
 	void OnLevelChanged();
 	
 	/** Handles adding a new actor to the level */
