@@ -1,0 +1,5 @@
+﻿#include "ShadingData.h"
+
+/*
+ * FShadingFilter
+ */
