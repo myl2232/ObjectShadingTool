@@ -9,12 +9,14 @@
 class FObjectShadingToolModule : public IModuleInterface
 {
 public:
-
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 	
+protected:
+	void PluginButtonClicked();
+	void RegisterMenus();
 private:
-	
+	TSharedPtr<class FUICommandList> PluginCommands;
 	FWidgetManager WidgetManager;
 };

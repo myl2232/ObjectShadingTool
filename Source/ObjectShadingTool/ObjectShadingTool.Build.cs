@@ -43,7 +43,11 @@ public class ObjectShadingTool : ModuleRules
 				"SlateCore",
                 "Landscape",
                 "Projects",
-				"UnrealEd"
+				"UnrealEd",
+				"MainFrame", 
+				"AppFramework",
+				"InputCore",
+				"ToolMenus",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

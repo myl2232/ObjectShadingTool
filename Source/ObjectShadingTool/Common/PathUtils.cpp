@@ -3,7 +3,7 @@
 #include "PathUtils.h"
 
 
-const FString FPathUtils::PluginName(TEXT("EasySynth"));
+const FString FPathUtils::PluginName(TEXT("ObjectShadingTool"));
 
 const FString FPathUtils::PlainColorMaterialAssetName(TEXT("M_PlainColor"));
 const FString FPathUtils::DefaultMoviePipelineConfigAssetName(TEXT("EasySynthMoviePipelineConfig"));

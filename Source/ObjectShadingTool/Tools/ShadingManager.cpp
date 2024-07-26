@@ -1,14 +1,12 @@
 ﻿#include "ShadingManager.h"
 
+#include "Engine/Selection.h"
 #include "Factories/MaterialInstanceConstantFactoryNew.h"
 #include "Kismet/GameplayStatics.h"
 
 #if PLATFORM_WINDOWS
 #include "FileHelpers.h"
 #endif
-
-const FString UShadingManager::SemanticColorParameter(TEXT("SemanticColor"));
-const FString UShadingManager::UndefinedSemanticClassName(TEXT("Undefined"));
 
 UShadingManager::UShadingManager()
 {
@@ -25,12 +23,27 @@ UShadingManager::UShadingManager()
 
 UShadingManager::~UShadingManager()
 {
-	
+	if(FHandle_Add.IsValid())
+	{
+		GEngine->OnLevelActorAdded().Remove(FHandle_Add);
+	}
+	if(FHandle_Remove.IsValid())
+	{
+		GEngine->OnLevelActorDeleted().Remove(FHandle_Remove);
+	}
+	if(FHandle_EditorClose.IsValid())
+	{
+		GEngine->OnEditorClose().Remove(FHandle_EditorClose);
+	}
+	if(FHandle_LevelChange.IsValid())
+	{
+		GEditor->OnPreviewFeatureLevelChanged().Remove(FHandle_LevelChange);
+	}
 }
 
 void UShadingManager::Initialize()
 {	
-	BindEvents();
+	
 }
 
 void UShadingManager::BindEvents()
@@ -38,16 +51,16 @@ void UShadingManager::BindEvents()
 	// Bind event to OnLevelActorDeleted event to remove the actor from our buffers
 	if (!bEventsBound && GEngine)
 	{
-		GEngine->OnLevelActorAdded().AddUObject(this, &UShadingManager::OnLevelActorAdded);
-		GEngine->OnLevelActorDeleted().AddUObject(this, &UShadingManager::OnLevelActorDeleted);
-		GEngine->OnEditorClose().AddUObject(this, &UShadingManager::OnEditorClose);
-		GWorld->OnLevelsChanged().AddUObject(this, &UShadingManager::OnLevelChanged);
+		FHandle_Add = GEngine->OnLevelActorAdded().AddUObject(this, &UShadingManager::OnLevelActorAdded);
+		FHandle_Remove = GEngine->OnLevelActorDeleted().AddUObject(this, &UShadingManager::OnLevelActorDeleted);
+		FHandle_EditorClose = GEngine->OnEditorClose().AddUObject(this, &UShadingManager::OnEditorClose);
+		FHandle_LevelChange = GEditor->OnPreviewFeatureLevelChanged().AddUObject(this, &UShadingManager::OnLevelChanged);
 	
 		bEventsBound = true;
 	}
 }
 
-void UShadingManager::OnLevelChanged()
+void UShadingManager::OnLevelChanged(ERHIFeatureLevel::Type type)
 {
 	ActorClassPairs.Empty();
 }
@@ -70,7 +83,6 @@ void UShadingManager::OnLevelActorDeleted(AActor* Actor)
 	TextureBackupManager->RemoveActor(Actor);
 }
 
-#if PLATFORM_WINDOWS
 void UShadingManager::OnEditorClose()
 {
 	UE_LOG(LogShadingTool, Log, TEXT("%s: Making sure original mesh colors are selected"), *FString(__FUNCTION__))
@@ -80,7 +92,6 @@ void UShadingManager::OnEditorClose()
 	Level->MarkPackageDirty();
 	FEditorFileUtils::SaveLevel(Level);
 }
-#endif
 
 void UShadingManager::SetSemanticClassToActor(AActor* Actor, const FString& ClassName, const bool bForceDisplaySemanticClass, const bool bDelayAddingDescriptors)
 {
@@ -225,3 +236,41 @@ UMaterialInstanceConstant* UShadingManager::GetSemanticClassMaterial(FShadingSem
 
 	return SemanticClass.PlainColorMaterialInstance;
 }
+
+void UShadingManager::ApplySemanticClassToSelectedActors(const FString& ClassName)
+{
+	if (!SemanticClasses.Contains(ClassName))
+	{
+		UE_LOG(LogShadingTool, Warning, TEXT("%s: Received semantic class '%s' not found"),
+			*FString(__FUNCTION__), *ClassName);
+		return;
+	}
+
+	UE_LOG(LogShadingTool, Log, TEXT("%s: Setting the '%s' semantic class to selected actors"),
+		*FString(__FUNCTION__), *ClassName)
+
+	TArray<UObject*> SelectedActors;
+	GEditor->GetSelectedActors()->GetSelectedObjects(AActor::StaticClass(), SelectedActors);
+
+	for (UObject* SelectedObject : SelectedActors)
+	{
+		AActor* SelectedActor = Cast<AActor>(SelectedObject);
+		if (SelectedActor == nullptr)
+		{
+			UE_LOG(LogShadingTool, Log, TEXT("%s: Got null actor"), *FString(__FUNCTION__))
+			return;
+		}
+
+		// Set the class to the actor
+		SetSemanticClassToActor(SelectedActor, ClassName);
+	}
+}
+
+void UShadingManager::RegistActorClassPair(AActor* Actor, FString OldClassName, FString ClassName)
+{
+	if (ActorClassPairs.Contains(Actor->GetActorGuid()) &&
+		ActorClassPairs[Actor->GetActorGuid()] == OldClassName)
+	{
+		SetSemanticClassToActor(Actor, ClassName);
+	}
+};
