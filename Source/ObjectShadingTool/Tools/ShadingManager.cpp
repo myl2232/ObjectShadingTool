@@ -23,6 +23,16 @@ UShadingManager::UShadingManager()
 
 UShadingManager::~UShadingManager()
 {
+	
+}
+
+void UShadingManager::Initialize()
+{	
+	
+}
+
+void UShadingManager::BeginDestroy()
+{
 	if(FHandle_Add.IsValid())
 	{
 		GEngine->OnLevelActorAdded().Remove(FHandle_Add);
@@ -39,13 +49,9 @@ UShadingManager::~UShadingManager()
 	{
 		GEditor->OnPreviewFeatureLevelChanged().Remove(FHandle_LevelChange);
 	}
-}
-
-void UShadingManager::Initialize()
-{	
 	
+	Super::BeginDestroy();
 }
-
 void UShadingManager::BindEvents()
 {
 	// Bind event to OnLevelActorDeleted event to remove the actor from our buffers

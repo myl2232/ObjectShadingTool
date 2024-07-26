@@ -23,6 +23,7 @@ public:
 	~UShadingManager();
 	
 	void BindEvents();
+	virtual void BeginDestroy() override;
 	
 protected:
 
