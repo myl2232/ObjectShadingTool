@@ -18,40 +18,46 @@ UShadingManager::UShadingManager()
 
 	PlainColorMaterial = DuplicateObject<UMaterial>(LoadObject<UMaterial>(nullptr, *FPathUtils::PlainColorMaterialPath()), nullptr);
 
+	ObjectShadings = DuplicateObject<UObjectShadingSet>(LoadObject<UObjectShadingSet>(nullptr, *FPathUtils::SemanticAssetPath()), nullptr);
+		
 	Initialize();
 }
 
 UShadingManager::~UShadingManager()
 {
-	
+	if(GEngine)
+	{
+		if(FHandle_Add.IsValid())
+		{
+			GEngine->OnLevelActorAdded().Remove(FHandle_Add);
+		}
+		if(FHandle_Remove.IsValid())
+		{
+			GEngine->OnLevelActorDeleted().Remove(FHandle_Remove);
+		}
+		if(FHandle_EditorClose.IsValid())
+		{
+			GEngine->OnEditorClose().Remove(FHandle_EditorClose);
+		}
+	}
+
+	if(GEditor)
+	{
+		if(FHandle_LevelChange.IsValid())
+		{
+			GEditor->OnPreviewFeatureLevelChanged().Remove(FHandle_LevelChange);
+		}
+	}	
 }
 
 void UShadingManager::Initialize()
-{	
-	
+{
+	if(ObjectShadings)
+	{
+		ObjectShadings->FlushObjectProperties();
+	}
 }
 
-void UShadingManager::BeginDestroy()
-{
-	if(FHandle_Add.IsValid())
-	{
-		GEngine->OnLevelActorAdded().Remove(FHandle_Add);
-	}
-	if(FHandle_Remove.IsValid())
-	{
-		GEngine->OnLevelActorDeleted().Remove(FHandle_Remove);
-	}
-	if(FHandle_EditorClose.IsValid())
-	{
-		GEngine->OnEditorClose().Remove(FHandle_EditorClose);
-	}
-	if(FHandle_LevelChange.IsValid())
-	{
-		GEditor->OnPreviewFeatureLevelChanged().Remove(FHandle_LevelChange);
-	}
-	
-	Super::BeginDestroy();
-}
 void UShadingManager::BindEvents()
 {
 	// Bind event to OnLevelActorDeleted event to remove the actor from our buffers

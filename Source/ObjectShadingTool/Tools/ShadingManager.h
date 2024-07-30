@@ -23,7 +23,6 @@ public:
 	~UShadingManager();
 	
 	void BindEvents();
-	virtual void BeginDestroy() override;
 	
 protected:
 
@@ -75,6 +74,9 @@ private:
 	/** Plain color material used for semantic mesh coloring */
 	UPROPERTY()
 	UMaterial* PlainColorMaterial = nullptr;
+
+	UPROPERTY()
+	UObjectShadingSet* ObjectShadings = nullptr;
 
 	FDelegateHandle FHandle_Add;
 	FDelegateHandle FHandle_Remove;

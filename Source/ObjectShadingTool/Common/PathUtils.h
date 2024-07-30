@@ -52,6 +52,13 @@ public:
 		return PostProcessMaterialsDir() / FString::Printf(TEXT("M_PP%s"), *TargetName);
 	}
 
+	static FString SemanticAssetPath()
+	{
+		return PluginContentDir() / SemanticAssetFile;
+	}
+
+	static const FString SemanticAssetFile;
+	
 	/** Clean name of the plan color material asset */
 	static const FString PlainColorMaterialAssetName;
 
